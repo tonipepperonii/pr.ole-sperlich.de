@@ -195,7 +195,6 @@ async function loadDataFromFirebase() {
 
         saveLocalData();
         updateUI();
-        showMessage('Daten von Firebase geladen', 'success');
     } catch (error) {
         console.error('Error loading from Firebase:', error);
         showMessage('Fehler beim Laden der Daten', 'error');
