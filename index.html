@@ -9,9 +9,6 @@
 </head>
 <body>
     <div class="app">
-        <header>
-            <h1>💪 PR Tracker</h1>
-        </header>
 
         <nav class="tab-nav">
             <button class="tab-btn active" data-tab="prs">PRs</button>
@@ -22,25 +19,17 @@
         <main class="content">
             <!-- PR Tab -->
             <div class="tab-content active" id="prs">
-                <div class="section">
-                    <h2>Neue Übung hinzufügen</h2>
-                    <div class="form-group">
-                        <input type="text" id="new-exercise" placeholder="Übungsname (z.B. Bankdrücken)">
-                        <button id="add-exercise">Hinzufügen</button>
-                    </div>
-                </div>
+                
 
                 <div class="section">
-                    <h2>PR eintragen</h2>
+                    <h2>Neuer PR</h2>
                     <form id="pr-form">
                         <div class="form-group">
-                            <label for="exercise-select">Übung:</label>
                             <select id="exercise-select" required>
                                 <option value="">Übung auswählen...</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="pr-date">Datum:</label>
                             <input type="date" id="pr-date" required>
                         </div>
                         <div class="form-group">
@@ -115,6 +104,13 @@
 
             <!-- Settings Tab -->
             <div class="tab-content" id="settings">
+                <div class="section">
+                    <h2>Neue Übung hinzufügen</h2>
+                    <div class="form-group">
+                        <input type="text" id="new-exercise" placeholder="Übungsname (z.B. Bankdrücken)">
+                        <button id="add-exercise">Hinzufügen</button>
+                    </div>
+                </div>
                 <div class="section">
                     <h2>Firebase Konfiguration</h2>
                     <p class="info">Trage hier deine Firebase-Konfiguration ein:</p>
