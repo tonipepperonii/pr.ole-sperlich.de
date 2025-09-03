@@ -88,8 +88,26 @@ function setupDateInputs() {
     document.getElementById('weight-date').value = today;
 }
 
+// Firebase Configuration - Hier deine Config eintragen!
+const FIREBASE_CONFIG = {
+    "apiKey": "AIzaSyDN5GjFDHFq2-mRpaejA5fxg-fCHcKyXaM",
+    "authDomain": "pr-tracking-bcf4a.firebaseapp.com",
+    "projectId": "pr-tracking-bcf4a",
+    "storageBucket": "pr-tracking-bcf4a.firebasestorage.app",
+    "messagingSenderId": "91735077638",
+    "appId": "1:91735077638:web:e09c1d5c5e3f0c442ba487"
+};
+
 // Firebase Management
 function loadFirebaseConfig() {
+    // Automatisch die eingebaute Config verwenden
+    if (FIREBASE_CONFIG && FIREBASE_CONFIG.apiKey) {
+        document.getElementById('firebase-config').value = JSON.stringify(FIREBASE_CONFIG, null, 2);
+        initializeFirebase(FIREBASE_CONFIG);
+        return;
+    }
+    
+    // Fallback: Aus localStorage laden
     const savedConfig = localStorage.getItem('firebase-config');
     if (savedConfig) {
         try {
