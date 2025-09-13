@@ -1,0 +1,21 @@
+<svg width="192" height="192" viewBox="0 0 192 192" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="192" height="192" fill="#ff4444" rx="24"/>
+  
+  <!-- Dumbbell Icon -->
+  <g fill="#ffffff" transform="translate(48, 76)">
+    <!-- Left weight -->
+    <rect x="0" y="8" width="16" height="24" rx="4"/>
+    <rect x="8" y="0" width="8" height="40" rx="2"/>
+    
+    <!-- Bar -->
+    <rect x="24" y="16" width="48" height="8" rx="4"/>
+    
+    <!-- Right weight -->
+    <rect x="80" y="8" width="16" height="24" rx="4"/>
+    <rect x="80" y="0" width="8" height="40" rx="2"/>
+  </g>
+  
+  <!-- PR Text -->
+  <text x="96" y="140" text-anchor="middle" fill="#ffffff" font-family="Arial, sans-serif" font-size="32" font-weight="bold">PR</text>
+</svg>

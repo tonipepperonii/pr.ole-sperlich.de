@@ -16,6 +16,7 @@ let app = {
 // Initialize App
 document.addEventListener('DOMContentLoaded', function() {
     initializeApp();
+    registerServiceWorker();
 });
 
 function initializeApp() {
@@ -740,3 +741,111 @@ function clearAllData() {
     updateUI();
     showMessage('Alle lokalen Daten gelöscht', 'success');
 }
+
+// PWA Service Worker Registration
+function registerServiceWorker() {
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', async () => {
+            try {
+                const registration = await navigator.serviceWorker.register('/sw.js');
+                console.log('PWA: Service Worker registered successfully', registration.scope);
+                
+                // Check for updates
+                registration.addEventListener('updatefound', () => {
+                    const newWorker = registration.installing;
+                    newWorker.addEventListener('statechange', () => {
+                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                            showMessage('App-Update verfügbar! Seite neu laden für neue Version.', 'success');
+                        }
+                    });
+                });
+                
+                // Handle offline/online status
+                window.addEventListener('online', () => {
+                    showMessage('Wieder online! Daten werden synchronisiert.', 'success');
+                });
+                
+                window.addEventListener('offline', () => {
+                    showMessage('Offline-Modus: Daten werden lokal gespeichert.', 'warning');
+                });
+                
+            } catch (error) {
+                console.log('PWA: Service Worker registration failed', error);
+            }
+        });
+    } else {
+        console.log('PWA: Service Workers not supported');
+    }
+}
+
+// PWA Install Prompt
+let deferredPrompt;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    console.log('PWA: Install prompt available');
+    
+    // Prevent Chrome 67 and earlier from automatically showing the prompt
+    e.preventDefault();
+    
+    // Stash the event so it can be triggered later
+    deferredPrompt = e;
+    
+    // Show custom install button/message
+    showInstallPrompt();
+});
+
+function showInstallPrompt() {
+    // Create install message
+    const installMessage = document.createElement('div');
+    installMessage.className = 'message success install-prompt';
+    installMessage.innerHTML = `
+        <div>📱 Als App installieren für bessere Erfahrung!</div>
+        <button onclick="installPWA()" style="margin-left: 1rem; padding: 0.5rem 1rem; background: var(--accent-red); color: white; border: none; border-radius: 4px; cursor: pointer;">Installieren</button>
+        <button onclick="dismissInstallPrompt()" style="margin-left: 0.5rem; padding: 0.5rem 1rem; background: transparent; color: var(--text-secondary); border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer;">Später</button>
+    `;
+    
+    // Insert at top of current tab content
+    const activeTab = document.querySelector('.tab-content.active');
+    activeTab.insertBefore(installMessage, activeTab.firstChild);
+    
+    // Auto remove after 10 seconds
+    setTimeout(() => {
+        if (installMessage.parentNode) {
+            installMessage.remove();
+        }
+    }, 10000);
+}
+
+async function installPWA() {
+    if (deferredPrompt) {
+        // Show the prompt
+        deferredPrompt.prompt();
+        
+        // Wait for the user to respond to the prompt
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log(`PWA: User response to install prompt: ${outcome}`);
+        
+        if (outcome === 'accepted') {
+            showMessage('App wird installiert! 🎉', 'success');
+        }
+        
+        // Clear the saved prompt since it can only be used once
+        deferredPrompt = null;
+        
+        // Remove install prompt
+        const installPrompt = document.querySelector('.install-prompt');
+        if (installPrompt) installPrompt.remove();
+    }
+}
+
+function dismissInstallPrompt() {
+    const installPrompt = document.querySelector('.install-prompt');
+    if (installPrompt) installPrompt.remove();
+    deferredPrompt = null;
+}
+
+// PWA Installation Success
+window.addEventListener('appinstalled', (evt) => {
+    console.log('PWA: App successfully installed');
+    showMessage('App erfolgreich installiert! 🚀', 'success');
+});
