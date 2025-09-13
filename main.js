@@ -293,9 +293,9 @@ function updateExerciseSelects() {
     // Clear options except first
     mainSelect.innerHTML = mainSelect.children[0].outerHTML;
     
-    // Add exercises (sortiert nach Erstellungsdatum, älteste zuerst)
+    // Add exercises (alphabetisch sortiert)
     const sortedExercises = [...app.exercises].sort((a, b) => 
-        new Date(a.createdAt) - new Date(b.createdAt)
+        a.name.localeCompare(b.name, 'de', { sensitivity: 'base' })
     );
     
     sortedExercises.forEach(exercise => {
@@ -305,9 +305,12 @@ function updateExerciseSelects() {
         mainSelect.appendChild(option);
     });
     
-    // Auto-select älteste Übung wenn keine ausgewählt und Übungen vorhanden
+    // Auto-select "Bankdrücken" falls vorhanden, sonst alphabetisch erste Übung
     if (!currentValue && sortedExercises.length > 0) {
-        mainSelect.value = sortedExercises[0].name;
+        const bankdruecken = sortedExercises.find(ex => ex.name === 'Bankdrücken');
+        const defaultExercise = bankdruecken || sortedExercises[0];
+        
+        mainSelect.value = defaultExercise.name;
         onMainExerciseChange();
     } else if (currentValue) {
         mainSelect.value = currentValue;
