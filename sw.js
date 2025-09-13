@@ -9,7 +9,8 @@ const STATIC_FILES = [
   '/main.css',
   '/main.js',
   '/manifest.json',
-  '/icon.svg'
+  '/icon-192.png',
+  '/icon-512.png'
 ];
 
 // External Resources (CDNs)
@@ -175,8 +176,8 @@ self.addEventListener('push', event => {
   
   const options = {
     body: 'Zeit für dein nächstes Workout! 💪',
-    icon: '/icon.svg',
-    badge: '/icon.svg',
+    icon: '/icon-192.png',
+    badge: '/icon-192.png',
     vibrate: [200, 100, 200],
     data: {
       url: '/'
