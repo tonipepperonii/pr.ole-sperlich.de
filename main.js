@@ -1,6 +1,7 @@
 // App State
 let app = {
     currentTab: 'prs',
+    selectedExercise: null,
     firebase: null,
     db: null,
     exercises: [],
@@ -76,8 +77,10 @@ function setupForms() {
     document.getElementById('export-data').addEventListener('click', exportData);
     document.getElementById('clear-data').addEventListener('click', clearAllData);
 
+    // Main Exercise Selection
+    document.getElementById('main-exercise-select').addEventListener('change', onMainExerciseChange);
+    
     // Chart Controls
-    document.getElementById('chart-exercise').addEventListener('change', updatePRChart);
     document.getElementById('chart-period').addEventListener('change', updatePRChart);
     document.getElementById('weight-chart-period').addEventListener('change', updateWeightChart);
 }
@@ -283,33 +286,57 @@ function addExercise() {
 }
 
 function updateExerciseSelects() {
-    const selects = ['exercise-select', 'chart-exercise'];
+    const mainSelect = document.getElementById('main-exercise-select');
+    const currentValue = mainSelect.value;
     
-    selects.forEach(selectId => {
-        const select = document.getElementById(selectId);
-        const currentValue = select.value;
-        
-        // Clear options except first
-        select.innerHTML = select.children[0].outerHTML;
-        
-        // Add exercises
-        app.exercises.forEach(exercise => {
-            const option = document.createElement('option');
-            option.value = exercise.name;
-            option.textContent = exercise.name;
-            select.appendChild(option);
-        });
-        
-        // Restore selection
-        if (currentValue) select.value = currentValue;
+    // Clear options except first
+    mainSelect.innerHTML = mainSelect.children[0].outerHTML;
+    
+    // Add exercises (sortiert nach Erstellungsdatum, älteste zuerst)
+    const sortedExercises = [...app.exercises].sort((a, b) => 
+        new Date(a.createdAt) - new Date(b.createdAt)
+    );
+    
+    sortedExercises.forEach(exercise => {
+        const option = document.createElement('option');
+        option.value = exercise.name;
+        option.textContent = exercise.name;
+        mainSelect.appendChild(option);
     });
+    
+    // Auto-select älteste Übung wenn keine ausgewählt und Übungen vorhanden
+    if (!currentValue && sortedExercises.length > 0) {
+        mainSelect.value = sortedExercises[0].name;
+        onMainExerciseChange();
+    } else if (currentValue) {
+        mainSelect.value = currentValue;
+    }
+}
+
+// Main Exercise Selection Handler
+function onMainExerciseChange() {
+    const selectedExercise = document.getElementById('main-exercise-select').value;
+    app.selectedExercise = selectedExercise;
+    
+    const exerciseContent = document.getElementById('exercise-content');
+    const noExerciseSelected = document.getElementById('no-exercise-selected');
+    
+    if (selectedExercise) {
+        exerciseContent.style.display = 'block';
+        noExerciseSelected.style.display = 'none';
+        updatePRList();
+        updatePRChart();
+    } else {
+        exerciseContent.style.display = 'none';
+        noExerciseSelected.style.display = 'block';
+    }
 }
 
 // PR Entry Management
 function addPREntry(e) {
     e.preventDefault();
     
-    const exerciseName = document.getElementById('exercise-select').value;
+    const exerciseName = app.selectedExercise;
     const date = document.getElementById('pr-date').value;
     const weight = parseFloat(document.getElementById('pr-weight').value);
     const reps = parseInt(document.getElementById('pr-reps').value) || null;
@@ -353,15 +380,20 @@ function deletePREntry(id) {
 function updatePRList() {
     const container = document.getElementById('pr-list');
     
-    if (app.prEntries.length === 0) {
-        container.innerHTML = '<div class="empty-state"><h3>Keine Einträge</h3><p>Füge deine ersten PRs hinzu!</p></div>';
+    // Nur Einträge für die aktuell gewählte Übung anzeigen
+    const selectedExerciseEntries = app.prEntries.filter(entry => 
+        entry.exercise === app.selectedExercise
+    );
+    
+    if (selectedExerciseEntries.length === 0) {
+        container.innerHTML = '<div class="empty-state"><h3>Keine Einträge</h3><p>Füge deinen ersten Eintrag für diese Übung hinzu!</p></div>';
         return;
     }
 
-    container.innerHTML = app.prEntries.map(entry => `
+    container.innerHTML = selectedExerciseEntries.map(entry => `
         <div class="entry-item">
             <div class="entry-info">
-                <div class="entry-value">${entry.exercise}: ${entry.weight}kg</div>
+                <div class="entry-value">${entry.weight}kg</div>
                 <div class="entry-date">${formatDate(entry.date)}</div>
                 ${entry.reps ? `<div class="entry-reps">${entry.reps} Wiederholungen</div>` : ''}
             </div>
@@ -432,12 +464,11 @@ function updateWeightList() {
 
 // Chart Management
 function updatePRChart() {
-    const exerciseSelect = document.getElementById('chart-exercise');
     const periodSelect = document.getElementById('chart-period');
     const canvas = document.getElementById('pr-chart');
     const ctx = canvas.getContext('2d');
 
-    const selectedExercise = exerciseSelect.value;
+    const selectedExercise = app.selectedExercise;
     const selectedPeriod = periodSelect.value;
 
     if (!selectedExercise) {
