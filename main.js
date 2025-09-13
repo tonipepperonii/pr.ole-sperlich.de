@@ -790,8 +790,12 @@ window.addEventListener('beforeinstallprompt', (e) => {
     // Stash the event so it can be triggered later
     deferredPrompt = e;
     
-    // Show custom install button/message
-    showInstallPrompt();
+    // Delay showing install prompt for better user experience
+    setTimeout(() => {
+        if (deferredPrompt) {
+            showInstallPrompt();
+        }
+    }, 3000); // Warte 3 Sekunden
 });
 
 function showInstallPrompt() {
@@ -835,6 +839,18 @@ async function installPWA() {
         // Remove install prompt
         const installPrompt = document.querySelector('.install-prompt');
         if (installPrompt) installPrompt.remove();
+    } else {
+        // Fallback instructions for different browsers
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        
+        if (isIOS) {
+            showMessage('📱 Safari: Teilen-Button → "Zum Home-Bildschirm hinzufügen"', 'success');
+        } else if (isMobile) {
+            showMessage('📱 Chrome: Menü → "App installieren" oder mehrmals besuchen', 'success');
+        } else {
+            showMessage('💻 Chrome: Adressleiste → Install-Symbol oder Menü → "App installieren"', 'success');
+        }
     }
 }
 
