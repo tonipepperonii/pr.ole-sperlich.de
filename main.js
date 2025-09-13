@@ -515,12 +515,12 @@ function updatePRChart() {
             datasets: [{
                 label: `${selectedExercise} (kg)`,
                 data: weights,
-                borderColor: '#ff4444',
-                backgroundColor: 'rgba(255, 68, 68, 0.1)',
+                borderColor: '#FFF0D0',
+                backgroundColor: 'rgba(255, 240, 208, 0.1)',
                 borderWidth: 3,
                 fill: true,
                 tension: 0.4,
-                pointBackgroundColor: '#ff4444',
+                pointBackgroundColor: '#FFF0D0',
                 pointBorderColor: '#ffffff',
                 pointBorderWidth: 2,
                 pointRadius: 6
@@ -596,12 +596,12 @@ function updateWeightChart() {
             datasets: [{
                 label: 'Körpergewicht (kg)',
                 data: weights,
-                borderColor: '#ff4444',
-                backgroundColor: 'rgba(255, 68, 68, 0.1)',
+                borderColor: '#FFF0D0',
+                backgroundColor: 'rgba(255, 240, 208, 0.1)',
                 borderWidth: 3,
                 fill: true,
                 tension: 0.4,
-                pointBackgroundColor: '#ff4444',
+                pointBackgroundColor: '#FFF0D0',
                 pointBorderColor: '#ffffff',
                 pointBorderWidth: 2,
                 pointRadius: 6
