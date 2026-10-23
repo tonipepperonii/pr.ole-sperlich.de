@@ -101,11 +101,6 @@ function setupForms() {
     });
 
     // Exercise Chips
-    document.getElementById('exercise-chips').addEventListener('click', (e) => {
-        const chip = e.target.closest('.chip');
-        if (chip) selectExercise(chip.dataset.id);
-    });
-
     // Übungsauswahl als Sheet mit Suche
     const pickerDialog = document.getElementById('picker-dialog');
     document.getElementById('exercise-picker').addEventListener('click', openPicker);
@@ -633,7 +628,7 @@ function getRecentExercises(limit) {
         .slice(0, limit);
 }
 
-function updateExerciseChips() {
+function updateExercisePicker() {
     const sorted = getSortedExercises();
 
     // Fallback: erste Übung in der eigenen Reihenfolge
@@ -644,16 +639,6 @@ function updateExerciseChips() {
     const selected = getSelectedExercise();
     document.getElementById('exercise-picker').hidden = !selected;
     document.getElementById('picker-name').textContent = selected ? selected.name : '–';
-
-    // Schnellwechsel zwischen den zuletzt trainierten Übungen
-    const recent = getRecentExercises(5);
-    const container = document.getElementById('exercise-chips');
-    document.getElementById('recent-wrap').hidden = recent.length < 2;
-
-    container.innerHTML = recent.map(exercise => `
-        <button type="button" class="chip ${exercise.id === app.selectedExerciseId ? 'active' : ''}" data-id="${escapeHtml(exercise.id)}">${escapeHtml(exercise.name)}</button>
-    `).join('');
-    container.scrollLeft = 0;
 }
 
 function selectExercise(id) {
@@ -661,9 +646,6 @@ function selectExercise(id) {
     localStorage.setItem('selected-exercise', id);
     const selected = getSelectedExercise();
     document.getElementById('picker-name').textContent = selected ? selected.name : '–';
-    document.querySelectorAll('#exercise-chips .chip').forEach(chip => {
-        chip.classList.toggle('active', chip.dataset.id === id);
-    });
     updateExerciseContent();
 }
 
@@ -717,7 +699,7 @@ function renderPickerList() {
 }
 
 function updateExerciseViews() {
-    updateExerciseChips();
+    updateExercisePicker();
     updateExerciseManageList();
     updateExerciseContent();
 }
@@ -793,7 +775,7 @@ function addPREntry(e) {
     setupDateInputs();
     document.activeElement.blur();
 
-    updateExerciseChips();
+    updateExercisePicker();
     updateExerciseContent();
     updateExerciseManageList();
 
@@ -810,7 +792,7 @@ function deletePREntry(id) {
     deleteFromFirebase('pr-entries', id);
     app.prEntries = app.prEntries.filter(entry => entry.id !== id);
     saveLocalData();
-    updateExerciseChips();
+    updateExercisePicker();
     updateExerciseContent();
     updateExerciseManageList();
     showMessage('Eintrag gelöscht', 'success');

@@ -252,7 +252,7 @@ body {
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    margin-bottom: 12px;
+    margin-bottom: 14px;
     padding: 10px 16px;
     background: var(--surface);
     border: 1px solid var(--border);
@@ -294,48 +294,6 @@ body {
     stroke-width: 2;
     stroke-linecap: round;
     stroke-linejoin: round;
-}
-
-.recent-label {
-    color: var(--text-muted);
-    font-size: 0.75rem;
-    margin: 0 2px 6px;
-}
-
-/* Exercise Chips */
-.chip-scroller {
-    display: flex;
-    gap: 8px;
-    overflow-x: auto;
-    margin: 0 -16px 14px;
-    padding: 2px 16px 4px;
-    scrollbar-width: none;
-    scroll-snap-type: x proximity;
-}
-
-.chip-scroller::-webkit-scrollbar {
-    display: none;
-}
-
-.chip {
-    flex: 0 0 auto;
-    scroll-snap-align: start;
-    padding: 9px 16px;
-    border-radius: 999px;
-    border: 1px solid var(--border);
-    background: var(--surface);
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    font-weight: 500;
-    font-family: inherit;
-    cursor: pointer;
-    transition: background 0.2s, color 0.2s, border-color 0.2s;
-}
-
-.chip.active {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: #fff;
 }
 
 /* Segmented Control (Pills) */
