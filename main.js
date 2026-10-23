@@ -106,6 +106,21 @@ function setupForms() {
         if (chip) selectExercise(chip.dataset.id);
     });
 
+    // Übungsauswahl als Sheet mit Suche
+    const pickerDialog = document.getElementById('picker-dialog');
+    document.getElementById('exercise-picker').addEventListener('click', openPicker);
+    document.getElementById('picker-search').addEventListener('input', renderPickerList);
+    document.getElementById('picker-list').addEventListener('click', (e) => {
+        const item = e.target.closest('[data-id]');
+        if (!item) return;
+        pickerDialog.close();
+        selectExercise(item.dataset.id);
+        window.scrollTo(0, 0);
+    });
+    pickerDialog.addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) e.currentTarget.close();
+    });
+
     // PR Form
     document.getElementById('pr-form').addEventListener('submit', addPREntry);
 
@@ -602,8 +617,23 @@ function updateExerciseManageList() {
     }).join('');
 }
 
+// Übungen nach letztem Eintrag, neueste zuerst
+function getRecentExercises(limit) {
+    const lastDates = new Map();
+    app.prEntries.forEach(entry => {
+        const time = parseDate(entry.date).getTime();
+        if (!lastDates.has(entry.exercise) || lastDates.get(entry.exercise) < time) {
+            lastDates.set(entry.exercise, time);
+        }
+    });
+
+    return app.exercises
+        .filter(exercise => lastDates.has(exercise.name))
+        .sort((a, b) => lastDates.get(b.name) - lastDates.get(a.name))
+        .slice(0, limit);
+}
+
 function updateExerciseChips() {
-    const container = document.getElementById('exercise-chips');
     const sorted = getSortedExercises();
 
     // Fallback: erste Übung in der eigenen Reihenfolge
@@ -611,22 +641,79 @@ function updateExerciseChips() {
         app.selectedExerciseId = sorted[0].id;
     }
 
-    container.innerHTML = sorted.map(exercise => `
+    const selected = getSelectedExercise();
+    document.getElementById('exercise-picker').hidden = !selected;
+    document.getElementById('picker-name').textContent = selected ? selected.name : '–';
+
+    // Schnellwechsel zwischen den zuletzt trainierten Übungen
+    const recent = getRecentExercises(5);
+    const container = document.getElementById('exercise-chips');
+    document.getElementById('recent-wrap').hidden = recent.length < 2;
+
+    container.innerHTML = recent.map(exercise => `
         <button type="button" class="chip ${exercise.id === app.selectedExerciseId ? 'active' : ''}" data-id="${escapeHtml(exercise.id)}">${escapeHtml(exercise.name)}</button>
     `).join('');
-
-    // Aktiven Chip sichtbar machen, ohne die Seite vertikal zu scrollen
-    const active = container.querySelector('.chip.active');
-    if (active) container.scrollLeft = Math.max(0, active.offsetLeft - 16);
+    container.scrollLeft = 0;
 }
 
 function selectExercise(id) {
     app.selectedExerciseId = id;
     localStorage.setItem('selected-exercise', id);
+    const selected = getSelectedExercise();
+    document.getElementById('picker-name').textContent = selected ? selected.name : '–';
     document.querySelectorAll('#exercise-chips .chip').forEach(chip => {
         chip.classList.toggle('active', chip.dataset.id === id);
     });
     updateExerciseContent();
+}
+
+function openPicker() {
+    document.getElementById('picker-search').value = '';
+    renderPickerList();
+    document.getElementById('picker-dialog').showModal();
+    document.getElementById('picker-list').scrollTop = 0;
+}
+
+// Suche ignoriert Groß-/Kleinschreibung und Umlaute ("kniebeu", "bankdrucken")
+function normalizeSearch(value) {
+    return value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/ß/g, 'ss');
+}
+
+function renderPickerList() {
+    const container = document.getElementById('picker-list');
+    const query = normalizeSearch(document.getElementById('picker-search').value.trim());
+    const sorted = getSortedExercises();
+
+    const renderItem = exercise => {
+        const type = exerciseType(exercise);
+        const entries = entriesForExercise(exercise);
+        const best = bestValue(entries, type);
+        const meta = best !== null
+            ? `Bestleistung ${formatValue(best, type)}`
+            : 'Noch keine Einträge';
+        const isActive = exercise.id === app.selectedExerciseId;
+        return `
+        <button type="button" class="picker-item ${isActive ? 'active' : ''}" data-id="${escapeHtml(exercise.id)}">
+            <div class="entry-info">
+                <div class="entry-value">${escapeHtml(exercise.name)}<span class="badge type">${EXERCISE_TYPES[type].short}</span></div>
+                <div class="entry-meta">${escapeHtml(meta)}</div>
+            </div>
+            ${isActive ? '<svg class="picker-check" viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></svg>' : ''}
+        </button>`;
+    };
+
+    if (query) {
+        const matches = sorted.filter(exercise => normalizeSearch(exercise.name).includes(query));
+        container.innerHTML = matches.length
+            ? matches.map(renderItem).join('')
+            : '<div class="empty-state"><p>Keine Übung gefunden.<br>Neue Übungen legst du im Tab „Übungen“ an.</p></div>';
+        return;
+    }
+
+    const recent = getRecentExercises(5);
+    container.innerHTML =
+        (recent.length ? `<div class="picker-section">Zuletzt trainiert</div>${recent.map(renderItem).join('')}` : '') +
+        `<div class="picker-section">Alle Übungen</div>${sorted.map(renderItem).join('')}`;
 }
 
 function updateExerciseViews() {
@@ -706,6 +793,7 @@ function addPREntry(e) {
     setupDateInputs();
     document.activeElement.blur();
 
+    updateExerciseChips();
     updateExerciseContent();
     updateExerciseManageList();
 
@@ -722,6 +810,7 @@ function deletePREntry(id) {
     deleteFromFirebase('pr-entries', id);
     app.prEntries = app.prEntries.filter(entry => entry.id !== id);
     saveLocalData();
+    updateExerciseChips();
     updateExerciseContent();
     updateExerciseManageList();
     showMessage('Eintrag gelöscht', 'success');

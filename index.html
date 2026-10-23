@@ -39,7 +39,17 @@
                 </header>
 
                 <!-- Übungsauswahl -->
-                <div class="chip-scroller" id="exercise-chips"></div>
+                <button type="button" class="exercise-picker" id="exercise-picker" hidden>
+                    <span class="picker-text">
+                        <span class="picker-label">Übung</span>
+                        <span class="picker-name" id="picker-name">–</span>
+                    </span>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+                </button>
+                <div class="recent" id="recent-wrap" hidden>
+                    <div class="recent-label">Zuletzt trainiert</div>
+                    <div class="chip-scroller" id="exercise-chips"></div>
+                </div>
 
                 <!-- Übungsspezifische Bereiche (nur sichtbar wenn Übung gewählt) -->
                 <div id="exercise-content" hidden>
@@ -304,6 +314,16 @@
             <button type="button" id="delete-exercise" class="btn-danger">Übung löschen</button>
             <button type="submit" value="cancel" class="btn-ghost">Abbrechen</button>
         </form>
+    </dialog>
+
+    <!-- Übung wählen -->
+    <dialog id="picker-dialog" class="sheet sheet-tall">
+        <div class="sheet-body">
+            <div class="sheet-handle"></div>
+            <h2 tabindex="-1" autofocus>Übung wählen</h2>
+            <input type="search" id="picker-search" placeholder="Suchen …" autocomplete="off" enterkeyhint="search">
+            <div id="picker-list" class="picker-list"></div>
+        </div>
     </dialog>
 
     <div id="toast" class="toast" role="status" hidden></div>

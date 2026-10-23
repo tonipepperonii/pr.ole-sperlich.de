@@ -246,6 +246,62 @@ body {
     font-size: 0.75rem;
 }
 
+/* Übungsauswahl */
+.exercise-picker {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 12px;
+    padding: 10px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    text-align: left;
+    cursor: pointer;
+}
+
+.exercise-picker:active {
+    background: var(--surface-2);
+}
+
+.picker-text {
+    min-width: 0;
+}
+
+.picker-label {
+    display: block;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+}
+
+.picker-name {
+    display: block;
+    font-size: 1.15rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.exercise-picker svg {
+    flex: 0 0 auto;
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: var(--mint);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.recent-label {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    margin: 0 2px 6px;
+}
+
 /* Exercise Chips */
 .chip-scroller {
     display: flex;
@@ -749,6 +805,85 @@ details[open].card summary {
 
 .toast.error {
     border-color: var(--danger);
+}
+
+.sheet-tall[open] {
+    display: flex;
+    height: 88dvh;
+}
+
+.sheet-body {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-height: 0;
+    padding: 10px 18px 0;
+}
+
+.sheet-body input[type="search"] {
+    flex: 0 0 auto;
+    margin-bottom: 12px;
+}
+
+.picker-list {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 0 -18px;
+    padding: 0 18px calc(var(--safe-bottom) + 16px);
+}
+
+.picker-section {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    margin: 12px 2px 6px;
+}
+
+.picker-section:first-child {
+    margin-top: 0;
+}
+
+.picker-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    margin-bottom: 6px;
+    padding: 12px 14px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    text-align: left;
+    cursor: pointer;
+}
+
+.picker-item.active {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+}
+
+.picker-item .entry-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.picker-item .entry-value {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.picker-check {
+    flex: 0 0 auto;
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: var(--mint);
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
 }
 
 .sheet h2:focus {
