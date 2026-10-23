@@ -30,29 +30,36 @@
 }
 
 html {
+    height: 100%;
     background: var(--bg);
     color-scheme: dark;
+    overscroll-behavior: none;
 }
 
 body {
+    height: 100%;
+    overflow: hidden;
     font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', sans-serif;
     background:
         radial-gradient(120% 60% at 100% 0%, rgba(34, 163, 126, 0.14), transparent 60%),
         var(--bg);
     background-attachment: fixed;
     color: var(--text);
-    min-height: 100vh;
     line-height: 1.45;
     -webkit-font-smoothing: antialiased;
-    overscroll-behavior-y: none;
 }
 
 [hidden] {
     display: none !important;
 }
 
+/* Eigener Scroll-Container: iOS zieht beim Gummiband-Effekt sonst die fixierte Navigation mit */
 .app {
-    min-height: 100vh;
+    position: fixed;
+    inset: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
 }
 
 /* Content */
@@ -320,6 +327,13 @@ body {
     font-family: inherit;
     cursor: pointer;
     transition: background 0.2s, color 0.2s;
+}
+
+#new-exercise-category button,
+#edit-exercise-category button {
+    padding-left: 4px;
+    padding-right: 4px;
+    font-size: 0.8rem;
 }
 
 .segmented button.active {

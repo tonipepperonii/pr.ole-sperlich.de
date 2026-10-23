@@ -8,6 +8,7 @@ let app = {
     prEntries: [],
     weightEntries: [],
     newExerciseType: 'weight',
+    newExerciseCategory: 'other',
     editingExerciseId: null,
     periods: {
         pr: localStorage.getItem('pr-period') || 'max',
@@ -24,6 +25,13 @@ const EXERCISE_TYPES = {
     weight: { label: 'Gewicht', short: 'kg' },
     reps: { label: 'Wiederholungen', short: 'Wdh.' },
     time: { label: 'Dauer', short: 'Zeit' }
+};
+
+// Kategorien in der Reihenfolge der Übungsauswahl; ohne Kategorie = Sonstiges
+const EXERCISE_CATEGORIES = {
+    calisthenics: { label: 'Calisthenics' },
+    gym: { label: 'Gym' },
+    other: { label: 'Sonstiges', section: 'Sonstige' }
 };
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -65,7 +73,7 @@ function setupTabs() {
             tabContents.forEach(content => content.classList.toggle('active', content.id === tabId));
 
             app.currentTab = tabId;
-            window.scrollTo(0, 0);
+            scrollToTop();
 
             // Charts neu zeichnen, sobald der Tab sichtbar ist
             if (tabId === 'prs') {
@@ -85,6 +93,7 @@ function setupForms() {
         if (e.key === 'Enter') addExercise();
     });
     setupSegmented('new-exercise-type', 'type', type => { app.newExerciseType = type; });
+    setupSegmented('new-exercise-category', 'category', category => { app.newExerciseCategory = category; });
 
     // Exercise Management
     document.getElementById('exercise-manage-list').addEventListener('click', onManageListClick);
@@ -96,6 +105,7 @@ function setupForms() {
         if (e.target === e.currentTarget) e.currentTarget.close();
     });
     setupSegmented('edit-exercise-type', 'type', type => updateGoalFields(type));
+    setupSegmented('edit-exercise-category', 'category');
     document.getElementById('pr-goal-set').addEventListener('click', () => {
         if (app.selectedExerciseId) openExerciseDialog(app.selectedExerciseId, true);
     });
@@ -110,7 +120,7 @@ function setupForms() {
         if (!item) return;
         pickerDialog.close();
         selectExercise(item.dataset.id);
-        window.scrollTo(0, 0);
+        scrollToTop();
     });
     pickerDialog.addEventListener('click', (e) => {
         if (e.target === e.currentTarget) e.currentTarget.close();
@@ -172,6 +182,11 @@ function setSegmentedValue(containerId, dataKey, value) {
 function getSegmentedValue(containerId, dataKey) {
     const active = document.querySelector(`#${containerId} button.active`);
     return active ? active.dataset[dataKey] : null;
+}
+
+// Die Seite scrollt in .app, nicht im Dokument
+function scrollToTop() {
+    document.querySelector('.app').scrollTop = 0;
 }
 
 function setupDateInputs() {
@@ -303,6 +318,10 @@ function exerciseType(exercise) {
     return exercise && EXERCISE_TYPES[exercise.type] ? exercise.type : 'weight';
 }
 
+function exerciseCategory(exercise) {
+    return exercise && EXERCISE_CATEGORIES[exercise.category] ? exercise.category : 'other';
+}
+
 function getSortedExercises() {
     return [...app.exercises].sort((a, b) => {
         const orderA = Number.isFinite(a.order) ? a.order : Infinity;
@@ -346,6 +365,7 @@ function addExercise() {
     const exercise = {
         name: exerciseName,
         type: app.newExerciseType,
+        category: app.newExerciseCategory,
         order: maxOrder + 1,
         createdAt: new Date().toISOString()
     };
@@ -414,6 +434,7 @@ function openExerciseDialog(id, focusGoal = false) {
     app.editingExerciseId = id;
     document.getElementById('edit-exercise-name').value = exercise.name;
     setSegmentedValue('edit-exercise-type', 'type', type);
+    setSegmentedValue('edit-exercise-category', 'category', exerciseCategory(exercise));
     updateGoalFields(type);
     document.getElementById('exercise-dialog').showModal();
 
@@ -462,6 +483,7 @@ function onExerciseDialogSubmit(e) {
 
     const newName = document.getElementById('edit-exercise-name').value.trim();
     const newType = getSegmentedValue('edit-exercise-type', 'type') || 'weight';
+    const newCategory = getSegmentedValue('edit-exercise-category', 'category') || 'other';
 
     if (!newName) {
         e.preventDefault();
@@ -479,6 +501,7 @@ function onExerciseDialogSubmit(e) {
     const changes = {};
     if (newName !== oldName) changes.name = newName;
     if (newType !== exerciseType(exercise)) changes.type = newType;
+    if (newCategory !== exercise.category) changes.category = newCategory;
     if (newGoal !== (exercise.goal || null)) changes.goal = newGoal;
     if (Object.keys(changes).length === 0) return;
 
@@ -563,7 +586,7 @@ function updateExerciseManageList() {
         <div class="entry-item manage-item" data-id="${escapeHtml(exercise.id)}">
             <div class="entry-info">
                 <div class="entry-value">${escapeHtml(exercise.name)}<span class="badge type">${EXERCISE_TYPES[exerciseType(exercise)].short}</span></div>
-                <div class="entry-meta">${count} ${count === 1 ? 'Eintrag' : 'Einträge'}${escapeHtml(goal)}</div>
+                <div class="entry-meta">${EXERCISE_CATEGORIES[exerciseCategory(exercise)].label} · ${count} ${count === 1 ? 'Eintrag' : 'Einträge'}${escapeHtml(goal)}</div>
             </div>
             <div class="manage-actions">
                 <button type="button" class="icon-btn" data-edit aria-label="Bearbeiten">${editIcon}</button>
@@ -654,10 +677,15 @@ function renderPickerList() {
         return;
     }
 
-    const recent = getRecentExercises(5);
-    container.innerHTML =
-        (recent.length ? `<div class="picker-section">Zuletzt trainiert</div>${recent.map(renderItem).join('')}` : '') +
-        `<div class="picker-section">Alle Übungen</div>${sorted.map(renderItem).join('')}`;
+    const renderSection = (title, exercises) => exercises.length
+        ? `<div class="picker-section">${title}</div>${exercises.map(renderItem).join('')}`
+        : '';
+
+    container.innerHTML = renderSection('Zuletzt', getRecentExercises(5)) +
+        Object.entries(EXERCISE_CATEGORIES).map(([key, category]) => renderSection(
+            category.section || category.label,
+            sorted.filter(exercise => exerciseCategory(exercise) === key)
+        )).join('');
 }
 
 function updateExerciseViews() {

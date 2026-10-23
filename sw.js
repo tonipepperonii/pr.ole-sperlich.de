@@ -1,5 +1,5 @@
 // Service Worker für PR Tracker PWA
-const CACHE_NAME = 'pr-tracker-v3';
+const CACHE_NAME = 'pr-tracker-v4';
 
 // App-Dateien (network first → Updates kommen sofort an, offline aus dem Cache)
 const STATIC_FILES = [

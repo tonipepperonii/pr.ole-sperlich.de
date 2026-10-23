@@ -229,6 +229,14 @@
                             <button type="button" data-type="time">Dauer</button>
                         </div>
                     </div>
+                    <div class="form-group">
+                        <label>Kategorie</label>
+                        <div class="segmented" id="new-exercise-category">
+                            <button type="button" data-category="calisthenics">Calisthenics</button>
+                            <button type="button" data-category="gym">Gym</button>
+                            <button type="button" data-category="other" class="active">Sonstiges</button>
+                        </div>
+                    </div>
                     <button id="add-exercise" class="btn-primary">Hinzufügen</button>
                 </div>
 
@@ -252,23 +260,23 @@
                 </div>
             </section>
         </main>
-
-        <!-- Bottom Navigation -->
-        <nav class="tab-nav">
-            <button class="tab-btn active" data-tab="prs">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11"/></svg>
-                <span>PRs</span>
-            </button>
-            <button class="tab-btn" data-tab="weight">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="M8.5 9.5a5 5 0 0 1 7 0M12 9.5l1.5-2"/></svg>
-                <span>Gewicht</span>
-            </button>
-            <button class="tab-btn" data-tab="settings">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>
-                <span>Übungen</span>
-            </button>
-        </nav>
     </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="tab-nav">
+        <button class="tab-btn active" data-tab="prs">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11"/></svg>
+            <span>PRs</span>
+        </button>
+        <button class="tab-btn" data-tab="weight">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="M8.5 9.5a5 5 0 0 1 7 0M12 9.5l1.5-2"/></svg>
+            <span>Gewicht</span>
+        </button>
+        <button class="tab-btn" data-tab="settings">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>
+            <span>Übungen</span>
+        </button>
+    </nav>
 
     <!-- Übung bearbeiten -->
     <dialog id="exercise-dialog" class="sheet">
@@ -285,6 +293,14 @@
                     <button type="button" data-type="weight">Gewicht</button>
                     <button type="button" data-type="reps">Wdh.</button>
                     <button type="button" data-type="time">Dauer</button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Kategorie</label>
+                <div class="segmented" id="edit-exercise-category">
+                    <button type="button" data-category="calisthenics">Calisthenics</button>
+                    <button type="button" data-category="gym">Gym</button>
+                    <button type="button" data-category="other">Sonstiges</button>
                 </div>
             </div>
             <div class="form-group" data-goal="value">
