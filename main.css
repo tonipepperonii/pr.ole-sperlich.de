@@ -29,37 +29,33 @@
     --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
 
+/* Gummiband-Effekt aus: iOS schiebt sonst die fixierte Navigation mit.
+   Muss am Root-Element stehen, am body greift es nicht. */
 html {
-    height: 100%;
     background: var(--bg);
     color-scheme: dark;
     overscroll-behavior: none;
 }
 
 body {
-    height: 100%;
-    overflow: hidden;
     font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', sans-serif;
     background:
         radial-gradient(120% 60% at 100% 0%, rgba(34, 163, 126, 0.14), transparent 60%),
         var(--bg);
     background-attachment: fixed;
     color: var(--text);
+    min-height: 100vh;
     line-height: 1.45;
     -webkit-font-smoothing: antialiased;
+    overscroll-behavior-y: none;
 }
 
 [hidden] {
     display: none !important;
 }
 
-/* Eigener Scroll-Container: iOS zieht beim Gummiband-Effekt sonst die fixierte Navigation mit */
 .app {
-    position: fixed;
-    inset: 0;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior-y: contain;
+    min-height: 100vh;
 }
 
 /* Content */

@@ -73,7 +73,7 @@ function setupTabs() {
             tabContents.forEach(content => content.classList.toggle('active', content.id === tabId));
 
             app.currentTab = tabId;
-            scrollToTop();
+            window.scrollTo(0, 0);
 
             // Charts neu zeichnen, sobald der Tab sichtbar ist
             if (tabId === 'prs') {
@@ -120,7 +120,7 @@ function setupForms() {
         if (!item) return;
         pickerDialog.close();
         selectExercise(item.dataset.id);
-        scrollToTop();
+        window.scrollTo(0, 0);
     });
     pickerDialog.addEventListener('click', (e) => {
         if (e.target === e.currentTarget) e.currentTarget.close();
@@ -182,11 +182,6 @@ function setSegmentedValue(containerId, dataKey, value) {
 function getSegmentedValue(containerId, dataKey) {
     const active = document.querySelector(`#${containerId} button.active`);
     return active ? active.dataset[dataKey] : null;
-}
-
-// Die Seite scrollt in .app, nicht im Dokument
-function scrollToTop() {
-    document.querySelector('.app').scrollTop = 0;
 }
 
 function setupDateInputs() {
