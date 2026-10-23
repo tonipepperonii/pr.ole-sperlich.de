@@ -1,21 +1,15 @@
-<svg width="192" height="192" viewBox="0 0 192 192" xmlns="http://www.w3.org/2000/svg">
-  <!-- Background -->
-  <rect width="192" height="192" fill="#ff4444" rx="24"/>
-  
-  <!-- Dumbbell Icon -->
-  <g fill="#ffffff" transform="translate(48, 76)">
-    <!-- Left weight -->
-    <rect x="0" y="8" width="16" height="24" rx="4"/>
-    <rect x="8" y="0" width="8" height="40" rx="2"/>
-    
-    <!-- Bar -->
-    <rect x="24" y="16" width="48" height="8" rx="4"/>
-    
-    <!-- Right weight -->
-    <rect x="80" y="8" width="16" height="24" rx="4"/>
-    <rect x="80" y="0" width="8" height="40" rx="2"/>
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="glow" cx="85%" cy="10%" r="90%">
+      <stop offset="0" stop-color="#1f5e4b"/>
+      <stop offset="0.55" stop-color="#0b1a16"/>
+      <stop offset="1" stop-color="#050a09"/>
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#glow)"/>
+  <!-- Dumbbell -->
+  <g fill="none" stroke="#5fd4a9" stroke-width="30" stroke-linecap="round">
+    <path d="M176 176v160M336 176v160M116 216v80M396 216v80M176 256h160"/>
   </g>
-  
-  <!-- PR Text -->
-  <text x="96" y="140" text-anchor="middle" fill="#ffffff" font-family="Arial, sans-serif" font-size="32" font-weight="bold">PR</text>
+  <text x="256" y="430" text-anchor="middle" fill="#f2f6f4" font-family="-apple-system, Helvetica, Arial, sans-serif" font-size="72" font-weight="700" letter-spacing="4">PR</text>
 </svg>

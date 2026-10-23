@@ -1,8 +1,7 @@
 // Service Worker für PR Tracker PWA
-const CACHE_NAME = 'pr-tracker-v1';
-const STATIC_CACHE = 'pr-tracker-static-v1';
+const CACHE_NAME = 'pr-tracker-v2';
 
-// Dateien die gecacht werden sollen
+// App-Dateien (network first → Updates kommen sofort an, offline aus dem Cache)
 const STATIC_FILES = [
   '/',
   '/index.html',
@@ -13,201 +12,76 @@ const STATIC_FILES = [
   '/icon-512.png'
 ];
 
-// External Resources (CDNs)
+// Versionierte CDN-Dateien ändern sich nie → cache first
 const EXTERNAL_RESOURCES = [
   'https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js',
   'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js',
-  'https://cdn.jsdelivr.net/npm/chart.js'
+  'https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js'
 ];
 
-// Service Worker Installation
 self.addEventListener('install', event => {
-  console.log('Service Worker: Installing...');
-  
   event.waitUntil(
-    Promise.all([
-      // Cache static files
-      caches.open(STATIC_CACHE).then(cache => {
-        console.log('Service Worker: Caching static files');
-        return cache.addAll(STATIC_FILES);
-      }),
-      // Cache external resources
-      caches.open(CACHE_NAME).then(cache => {
-        console.log('Service Worker: Caching external resources');
-        return cache.addAll(EXTERNAL_RESOURCES);
-      })
-    ]).then(() => {
-      console.log('Service Worker: Installation complete');
-      self.skipWaiting();
-    })
+    caches.open(CACHE_NAME)
+      .then(cache => cache.addAll([...STATIC_FILES, ...EXTERNAL_RESOURCES]))
+      .then(() => self.skipWaiting())
   );
 });
 
-// Service Worker Activation
 self.addEventListener('activate', event => {
-  console.log('Service Worker: Activating...');
-  
   event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cacheName => {
-          // Delete old caches
-          if (cacheName !== CACHE_NAME && cacheName !== STATIC_CACHE) {
-            console.log('Service Worker: Deleting old cache', cacheName);
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    }).then(() => {
-      console.log('Service Worker: Activation complete');
-      return self.clients.claim();
-    })
+    caches.keys()
+      .then(cacheNames => Promise.all(
+        cacheNames
+          .filter(cacheName => cacheName !== CACHE_NAME)
+          .map(cacheName => caches.delete(cacheName))
+      ))
+      .then(() => self.clients.claim())
   );
 });
 
-// Fetch Event - Cache Strategy
 self.addEventListener('fetch', event => {
   const { request } = event;
   const url = new URL(request.url);
-  
-  // Skip non-GET requests
-  if (request.method !== 'GET') {
-    return;
-  }
-  
-  // Handle different types of requests
+
+  if (request.method !== 'GET') return;
+
   if (url.origin === location.origin) {
-    // Same origin - use cache first, then network
-    event.respondWith(cacheFirst(request));
-  } else if (EXTERNAL_RESOURCES.some(resource => request.url.includes(resource))) {
-    // External resources - use cache first
-    event.respondWith(cacheFirst(request));
-  } else {
-    // Other external requests - network first
     event.respondWith(networkFirst(request));
+  } else if (EXTERNAL_RESOURCES.includes(request.url)) {
+    event.respondWith(cacheFirst(request));
   }
+  // Alles andere (z. B. Firestore) geht unverändert ans Netzwerk –
+  // Firestore hat einen eigenen Offline-Cache.
 });
 
-// Cache First Strategy
 async function cacheFirst(request) {
-  try {
-    const cachedResponse = await caches.match(request);
-    if (cachedResponse) {
-      console.log('Service Worker: Serving from cache', request.url);
-      return cachedResponse;
-    }
-    
-    const networkResponse = await fetch(request);
-    
-    // Cache successful responses
-    if (networkResponse.ok) {
-      const cache = await caches.open(CACHE_NAME);
-      cache.put(request, networkResponse.clone());
-      console.log('Service Worker: Cached new resource', request.url);
-    }
-    
-    return networkResponse;
-  } catch (error) {
-    console.log('Service Worker: Cache first failed', error);
-    
-    // Return offline fallback for HTML pages
-    if (request.headers.get('accept').includes('text/html')) {
-      const cachedResponse = await caches.match('/index.html');
-      return cachedResponse || new Response('Offline - Bitte Internetverbindung prüfen');
-    }
-    
-    throw error;
+  const cachedResponse = await caches.match(request);
+  if (cachedResponse) return cachedResponse;
+
+  const networkResponse = await fetch(request);
+  if (networkResponse.ok) {
+    const cache = await caches.open(CACHE_NAME);
+    cache.put(request, networkResponse.clone());
   }
+  return networkResponse;
 }
 
-// Network First Strategy
 async function networkFirst(request) {
   try {
     const networkResponse = await fetch(request);
-    
-    // Cache successful responses
     if (networkResponse.ok) {
       const cache = await caches.open(CACHE_NAME);
       cache.put(request, networkResponse.clone());
     }
-    
     return networkResponse;
   } catch (error) {
-    console.log('Service Worker: Network first failed, trying cache', error);
-    
-    const cachedResponse = await caches.match(request);
-    if (cachedResponse) {
-      return cachedResponse;
+    const cachedResponse = await caches.match(request, { ignoreSearch: true });
+    if (cachedResponse) return cachedResponse;
+
+    if (request.mode === 'navigate') {
+      const fallback = await caches.match('/index.html');
+      if (fallback) return fallback;
     }
-    
     throw error;
   }
 }
-
-// Background Sync (für offline Daten-Synchronisation)
-self.addEventListener('sync', event => {
-  console.log('Service Worker: Background sync triggered', event.tag);
-  
-  if (event.tag === 'background-sync') {
-    event.waitUntil(
-      // Hier könntest du offline gespeicherte Daten mit Firebase synchronisieren
-      syncOfflineData()
-    );
-  }
-});
-
-async function syncOfflineData() {
-  try {
-    // Placeholder für Firebase Sync
-    console.log('Service Worker: Syncing offline data...');
-    
-    // Hier würdest du offline gespeicherte Daten aus IndexedDB holen
-    // und mit Firebase synchronisieren
-    
-    console.log('Service Worker: Offline data sync complete');
-  } catch (error) {
-    console.log('Service Worker: Offline data sync failed', error);
-  }
-}
-
-// Push Notifications (optional für Erinnerungen)
-self.addEventListener('push', event => {
-  console.log('Service Worker: Push received');
-  
-  const options = {
-    body: 'Zeit für dein nächstes Workout! 💪',
-    icon: '/icon-192.png',
-    badge: '/icon-192.png',
-    vibrate: [200, 100, 200],
-    data: {
-      url: '/'
-    },
-    actions: [
-      {
-        action: 'open',
-        title: 'App öffnen'
-      },
-      {
-        action: 'close',
-        title: 'Schließen'
-      }
-    ]
-  };
-  
-  event.waitUntil(
-    self.registration.showNotification('PR Tracker', options)
-  );
-});
-
-// Notification Click Handler
-self.addEventListener('notificationclick', event => {
-  console.log('Service Worker: Notification clicked');
-  
-  event.notification.close();
-  
-  if (event.action === 'open' || !event.action) {
-    event.waitUntil(
-      clients.openWindow('/')
-    );
-  }
-});

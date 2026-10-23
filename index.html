@@ -2,179 +2,319 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>PR Tracker</title>
     <link rel="stylesheet" href="main.css">
     <meta name="robots" content="noindex, nofollow">
-    
+
     <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="#A85F5F">
+    <meta name="theme-color" content="#050a09">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="PR Tracker">
-    <meta name="msapplication-TileColor" content="#A85F5F">
-    <meta name="msapplication-TileImage" content="/icon-192.png">
-    
+
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json">
-    
+
     <!-- Apple Touch Icons -->
     <link rel="apple-touch-icon" href="/icon-192.png">
     <link rel="apple-touch-icon" sizes="192x192" href="/icon-192.png">
     <link rel="apple-touch-icon" sizes="512x512" href="/icon-512.png">
-    
+
     <!-- Favicon -->
     <link rel="icon" href="/icon-192.png" type="image/png">
 </head>
 <body>
     <div class="app">
 
-        <nav class="tab-nav">
-            <button class="tab-btn active" data-tab="prs">PRs</button>
-            <button class="tab-btn" data-tab="weight">Gewicht</button>
-            <button class="tab-btn" data-tab="settings">Settings</button>
-        </nav>
-
         <main class="content">
             <!-- PR Tab -->
-            <div class="tab-content active" id="prs">
-                
+            <section class="tab-content active" id="prs">
+                <header class="page-header">
+                    <div>
+                        <h1 id="greeting">Hallo 👋</h1>
+                        <p class="subtitle">Lass uns dein Training loggen</p>
+                    </div>
+                </header>
+
                 <!-- Übungsauswahl -->
-                <div class="form-group">
-                    <select id="main-exercise-select">
-                        <option value="">Übung wählen...</option>
-                    </select>
-                </div>
+                <div class="chip-scroller" id="exercise-chips"></div>
 
                 <!-- Übungsspezifische Bereiche (nur sichtbar wenn Übung gewählt) -->
-                <div id="exercise-content" style="display: none;">
-                    
+                <div id="exercise-content" hidden>
+
+                    <!-- Übersicht -->
+                    <div class="card hero-card">
+                        <div class="hero-top">
+                            <div class="hero-label" id="pr-hero-label">Bestleistung</div>
+                            <button type="button" class="btn-link" id="pr-goal-set">Ziel setzen</button>
+                        </div>
+                        <div class="hero-value" id="pr-hero-value">–</div>
+                        <div class="hero-delta" id="pr-hero-delta"></div>
+                        <div class="goal" id="pr-goal" hidden>
+                            <div class="goal-head">
+                                <span id="pr-goal-text">Ziel</span>
+                                <span class="goal-percent" id="pr-goal-percent"></span>
+                            </div>
+                            <div class="progress"><div class="progress-bar" id="pr-goal-bar"></div></div>
+                            <div class="goal-rest" id="pr-goal-rest"></div>
+                        </div>
+                        <div class="stat-row">
+                            <div class="stat-tile">
+                                <div class="stat-value" id="pr-stat-last">–</div>
+                                <div class="stat-label" id="pr-stat-last-label">Letzter Eintrag</div>
+                            </div>
+                            <div class="stat-tile">
+                                <div class="stat-value" id="pr-stat-extra">–</div>
+                                <div class="stat-label" id="pr-stat-extra-label">Einträge</div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Neuer Eintrag -->
-                    <div class="section">
+                    <div class="card">
                         <h2>Neuer Eintrag</h2>
-                        <form id="pr-form">
+                        <form id="pr-form" novalidate>
                             <div class="form-group">
+                                <label for="pr-date">Datum</label>
                                 <input type="date" id="pr-date" required>
                             </div>
-                            <div class="form-group">
-                                <input type="number" id="pr-weight" step="0.5" min="0" placeholder="Gewicht (kg)" required>
+                            <div class="form-row">
+                                <div class="form-group" data-field="weight">
+                                    <label for="pr-weight" id="pr-weight-label">Gewicht (kg)</label>
+                                    <input type="number" id="pr-weight" step="any" min="0" inputmode="decimal" placeholder="0">
+                                </div>
+                                <div class="form-group" data-field="reps">
+                                    <label for="pr-reps" id="pr-reps-label">Wiederholungen</label>
+                                    <input type="number" id="pr-reps" step="1" min="1" inputmode="numeric" placeholder="0">
+                                </div>
                             </div>
-                            <div class="form-group">
-                                <input type="number" id="pr-reps" min="1" placeholder="Wiederholungen (optional)">
+                            <div class="form-row" data-field="time">
+                                <div class="form-group">
+                                    <label for="pr-minutes">Minuten</label>
+                                    <input type="number" id="pr-minutes" step="1" min="0" inputmode="numeric" placeholder="0">
+                                </div>
+                                <div class="form-group">
+                                    <label for="pr-seconds">Sekunden</label>
+                                    <input type="number" id="pr-seconds" step="1" min="0" max="59" inputmode="numeric" placeholder="0">
+                                </div>
                             </div>
-                            <button type="submit">Eintrag speichern</button>
+                            <button type="submit" class="btn-primary">Eintrag speichern</button>
                         </form>
                     </div>
 
                     <!-- Verlaufsdiagramm -->
-                    <div class="section">
-                        <h2>Verlauf</h2>
-                        <div class="chart-controls">
-                            <select id="chart-period">
-                                <option value="3">3 Monate</option>
-                                <option value="6">6 Monate</option>
-                                <option value="12">1 Jahr</option>
-                                <option value="max" selected>Max</option>
-                            </select>
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>Verlauf</h2>
                         </div>
-                        <canvas id="pr-chart"></canvas>
+                        <div class="segmented" id="chart-period">
+                            <button type="button" data-period="3">3 M</button>
+                            <button type="button" data-period="6">6 M</button>
+                            <button type="button" data-period="12">1 J</button>
+                            <button type="button" data-period="max">Max</button>
+                        </div>
+                        <div class="chart-wrap">
+                            <canvas id="pr-chart"></canvas>
+                            <div class="chart-empty" id="pr-chart-empty" hidden>Keine Daten im Zeitraum</div>
+                        </div>
                     </div>
 
                     <!-- Einträge für diese Übung -->
-                    <div class="section">
+                    <div class="card">
                         <h2>Einträge</h2>
-                        <div id="pr-list"></div>
+                        <div id="pr-list" class="entry-list"></div>
                     </div>
-                    
+
                 </div>
 
                 <!-- Hinweis wenn keine Übung gewählt -->
-                <div id="no-exercise-selected" class="section">
+                <div id="no-exercise-selected" class="card">
                     <div class="empty-state">
-                        <h3>Keine Übung gewählt</h3>
-                        <p>Wähle oben eine Übung aus oder erstelle eine neue im Settings Tab.</p>
+                        <h3>Noch keine Übung</h3>
+                        <p>Lege im Tab „Übungen“ deine erste Übung an.</p>
                     </div>
                 </div>
-                
-            </div>
+            </section>
 
             <!-- Weight Tab -->
-            <div class="tab-content" id="weight">
-                <div class="section">
+            <section class="tab-content" id="weight">
+                <header class="page-header">
+                    <div>
+                        <h1>Körpergewicht</h1>
+                        <p class="subtitle">Dein Gewicht im Blick</p>
+                    </div>
+                </header>
+
+                <div class="card hero-card">
+                    <div class="hero-label">Aktuelles Gewicht</div>
+                    <div class="hero-value" id="weight-hero-value">–</div>
+                    <div class="hero-delta" id="weight-hero-delta"></div>
+                    <div class="stat-row">
+                        <div class="stat-tile">
+                            <div class="stat-value" id="weight-stat-min">–</div>
+                            <div class="stat-label">Tiefstwert</div>
+                        </div>
+                        <div class="stat-tile">
+                            <div class="stat-value" id="weight-stat-max">–</div>
+                            <div class="stat-label">Höchstwert</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
                     <h2>Gewicht eintragen</h2>
-                    <form id="weight-form">
-                        <div class="form-group">
-                            <input type="date" id="weight-date" required>
+                    <form id="weight-form" novalidate>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="weight-date">Datum</label>
+                                <input type="date" id="weight-date" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="weight-value">Gewicht (kg)</label>
+                                <input type="number" id="weight-value" step="any" min="0" inputmode="decimal" placeholder="0" required>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <input type="number" id="weight-value" step="0.1" min="0" placeholder="Gewicht (kg)" required>
-                        </div>
-                        <button type="submit">Gewicht speichern</button>
+                        <button type="submit" class="btn-primary">Gewicht speichern</button>
                     </form>
                 </div>
 
-                <div class="section">
-                    <h2>Gewichtsverlauf</h2>
-                    <div class="chart-controls">
-                        <select id="weight-chart-period">
-                            <option value="3">3 Monate</option>
-                            <option value="6">6 Monate</option>
-                            <option value="12">1 Jahr</option>
-                            <option value="max" selected>Max</option>
-                        </select>
+                <div class="card">
+                    <h2>Verlauf</h2>
+                    <div class="segmented" id="weight-chart-period">
+                        <button type="button" data-period="3">3 M</button>
+                        <button type="button" data-period="6">6 M</button>
+                        <button type="button" data-period="12">1 J</button>
+                        <button type="button" data-period="max">Max</button>
                     </div>
-                    <canvas id="weight-chart"></canvas>
+                    <div class="chart-wrap">
+                        <canvas id="weight-chart"></canvas>
+                        <div class="chart-empty" id="weight-chart-empty" hidden>Keine Daten im Zeitraum</div>
+                    </div>
                 </div>
 
-                <div class="section">
-                    <h2>Alle Gewichtseinträge</h2>
-                    <div id="weight-list"></div>
+                <div class="card">
+                    <h2>Einträge</h2>
+                    <div id="weight-list" class="entry-list"></div>
                 </div>
-            </div>
+            </section>
 
             <!-- Settings Tab -->
-            <div class="tab-content" id="settings">
-                <div class="section">
-                    <h2>Neue Übung hinzufügen</h2>
-                    <div class="form-group">
-                        <input type="text" id="new-exercise" placeholder="Übungsname (z.B. Bankdrücken)">
-                        <button id="add-exercise">Hinzufügen</button>
+            <section class="tab-content" id="settings">
+                <header class="page-header">
+                    <div>
+                        <h1>Übungen</h1>
+                        <p class="subtitle">Verwalten, sortieren &amp; Einstellungen</p>
                     </div>
+                </header>
+
+                <div class="card">
+                    <h2>Neue Übung</h2>
+                    <div class="form-group">
+                        <label for="new-exercise">Name</label>
+                        <input type="text" id="new-exercise" placeholder="z. B. Klimmzüge" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label>Gemessen wird</label>
+                        <div class="segmented" id="new-exercise-type">
+                            <button type="button" data-type="weight" class="active">Gewicht</button>
+                            <button type="button" data-type="reps">Wdh.</button>
+                            <button type="button" data-type="time">Dauer</button>
+                        </div>
+                    </div>
+                    <button id="add-exercise" class="btn-primary">Hinzufügen</button>
                 </div>
-                <div class="section">
-                    <h2>Firebase Konfiguration</h2>
-                    <p class="info">Trage hier deine Firebase-Konfiguration ein:</p>
-                    <div class="form-group">
-                        <textarea id="firebase-config" rows="10" placeholder='{"apiKey": "...", "authDomain": "...", "projectId": "...", "storageBucket": "...", "messagingSenderId": "...", "appId": "..."}'></textarea>
-                        <button id="save-config">Konfiguration speichern</button>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Meine Übungen</h2>
+                        <button type="button" class="btn-link" id="sort-alpha">A–Z sortieren</button>
                     </div>
-                    <div class="connection-status">
+                    <p class="info">Pfeile zum Sortieren, Stift zum Umbenennen oder Löschen.</p>
+                    <div id="exercise-manage-list" class="entry-list"></div>
+                </div>
+
+                <div class="card">
+                    <h2>Daten</h2>
+                    <div class="connection-status" id="connection-status-box">
+                        <span class="status-dot"></span>
                         <span id="connection-status">Nicht verbunden</span>
                     </div>
+                    <button id="export-data" class="btn-outline">Daten exportieren</button>
+                    <button id="clear-data" class="btn-danger">Alle Daten löschen</button>
                 </div>
 
-                <div class="section">
-                    <h2>App installieren</h2>
-                    <p class="info">Installiere die App für eine bessere Erfahrung:</p>
-                    <button id="manual-install" onclick="installPWA()">📱 Als App installieren</button>
-                </div>
+                <details class="card">
+                    <summary>Firebase Konfiguration</summary>
+                    <div class="form-group">
+                        <textarea id="firebase-config" rows="9" placeholder='{"apiKey": "...", "projectId": "..."}'></textarea>
+                    </div>
+                    <button id="save-config" class="btn-outline">Konfiguration speichern</button>
+                </details>
+            </section>
+        </main>
 
-                <div class="section">
-                    <h2>Daten verwalten</h2>
-                    <button id="export-data" class="secondary">Daten exportieren</button>
-                    <button id="clear-data" class="danger">Alle Daten löschen</button>
+        <!-- Bottom Navigation -->
+        <nav class="tab-nav">
+            <button class="tab-btn active" data-tab="prs">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11"/></svg>
+                <span>PRs</span>
+            </button>
+            <button class="tab-btn" data-tab="weight">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="M8.5 9.5a5 5 0 0 1 7 0M12 9.5l1.5-2"/></svg>
+                <span>Gewicht</span>
+            </button>
+            <button class="tab-btn" data-tab="settings">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>
+                <span>Übungen</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- Übung bearbeiten -->
+    <dialog id="exercise-dialog" class="sheet">
+        <form method="dialog" id="exercise-edit-form">
+            <div class="sheet-handle"></div>
+            <h2 tabindex="-1" autofocus>Übung bearbeiten</h2>
+            <div class="form-group">
+                <label for="edit-exercise-name">Name</label>
+                <input type="text" id="edit-exercise-name" autocomplete="off">
+            </div>
+            <div class="form-group">
+                <label>Gemessen wird</label>
+                <div class="segmented" id="edit-exercise-type">
+                    <button type="button" data-type="weight">Gewicht</button>
+                    <button type="button" data-type="reps">Wdh.</button>
+                    <button type="button" data-type="time">Dauer</button>
                 </div>
             </div>
-        </main>
-    </div>
+            <div class="form-group" data-goal="value">
+                <label for="edit-goal" id="edit-goal-label">Ziel (optional)</label>
+                <input type="number" id="edit-goal" step="any" min="0" inputmode="decimal" placeholder="kein Ziel">
+            </div>
+            <div class="form-group" data-goal="time">
+                <label>Ziel (optional)</label>
+                <div class="form-row">
+                    <input type="number" id="edit-goal-min" step="1" min="0" inputmode="numeric" placeholder="Min">
+                    <input type="number" id="edit-goal-sec" step="1" min="0" max="59" inputmode="numeric" placeholder="Sek">
+                </div>
+            </div>
+            <button type="submit" value="save" class="btn-primary">Speichern</button>
+            <button type="button" id="delete-exercise" class="btn-danger">Übung löschen</button>
+            <button type="submit" value="cancel" class="btn-ghost">Abbrechen</button>
+        </form>
+    </dialog>
+
+    <div id="toast" class="toast" role="status" hidden></div>
 
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    
+
     <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
     <!-- Main App -->
     <script src="main.js"></script>
 </body>
