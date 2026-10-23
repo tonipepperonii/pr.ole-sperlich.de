@@ -132,9 +132,6 @@ function setupForms() {
         if (btn) deleteWeightEntry(btn.dataset.delete);
     });
 
-    // Firebase Config
-    document.getElementById('save-config').addEventListener('click', saveFirebaseConfig);
-
     // Data Management
     document.getElementById('export-data').addEventListener('click', exportData);
     document.getElementById('clear-data').addEventListener('click', clearAllData);
@@ -183,7 +180,7 @@ function setupDateInputs() {
     document.getElementById('weight-date').value = today;
 }
 
-// Firebase Configuration - Hier deine Config eintragen!
+// Firebase Configuration
 const FIREBASE_CONFIG = {
     "apiKey": "AIzaSyDN5GjFDHFq2-mRpaejA5fxg-fCHcKyXaM",
     "authDomain": "pr-tracking-bcf4a.firebaseapp.com",
@@ -195,42 +192,7 @@ const FIREBASE_CONFIG = {
 
 // Firebase Management
 function loadFirebaseConfig() {
-    // Automatisch die eingebaute Config verwenden
-    if (FIREBASE_CONFIG && FIREBASE_CONFIG.apiKey) {
-        document.getElementById('firebase-config').value = JSON.stringify(FIREBASE_CONFIG, null, 2);
-        initializeFirebase(FIREBASE_CONFIG);
-        return;
-    }
-
-    // Fallback: Aus localStorage laden
-    const savedConfig = localStorage.getItem('firebase-config');
-    if (savedConfig) {
-        try {
-            const config = JSON.parse(savedConfig);
-            document.getElementById('firebase-config').value = JSON.stringify(config, null, 2);
-            initializeFirebase(config);
-        } catch (error) {
-            console.error('Error loading Firebase config:', error);
-        }
-    }
-}
-
-function saveFirebaseConfig() {
-    const configText = document.getElementById('firebase-config').value.trim();
-    if (!configText) {
-        showMessage('Bitte Firebase-Konfiguration eingeben', 'error');
-        return;
-    }
-
-    try {
-        const config = JSON.parse(configText);
-        localStorage.setItem('firebase-config', JSON.stringify(config));
-        initializeFirebase(config);
-        showMessage('Firebase-Konfiguration gespeichert', 'success');
-    } catch (error) {
-        showMessage('Ungültige JSON-Konfiguration', 'error');
-        console.error('Config parse error:', error);
-    }
+    initializeFirebase(FIREBASE_CONFIG);
 }
 
 async function initializeFirebase(config) {

@@ -348,7 +348,7 @@ label {
     font-weight: 500;
 }
 
-input, textarea {
+input {
     display: block;
     width: 100%;
     min-width: 0;
@@ -363,14 +363,6 @@ input, textarea {
     transition: border-color 0.2s, background 0.2s;
     -webkit-appearance: none;
     appearance: none;
-}
-
-textarea {
-    height: auto;
-    padding: 12px 14px;
-    font-family: ui-monospace, Menlo, monospace;
-    font-size: 13px;
-    resize: vertical;
 }
 
 /* iOS Datumsfeld: intrinsische Mindestbreite aufheben */
@@ -388,13 +380,13 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     filter: invert(1) opacity(0.6);
 }
 
-input:focus, textarea:focus {
+input:focus {
     outline: none;
     border-color: var(--accent-strong);
     background: var(--surface-3);
 }
 
-input::placeholder, textarea::placeholder {
+input::placeholder {
     color: var(--text-muted);
 }
 
@@ -598,33 +590,6 @@ canvas {
 .connection-status.connected .status-dot {
     background: var(--mint);
     box-shadow: 0 0 0 4px var(--accent-soft);
-}
-
-/* Details */
-details.card summary {
-    font-size: 1.1rem;
-    font-weight: 600;
-    cursor: pointer;
-    list-style: none;
-}
-
-details.card summary::-webkit-details-marker {
-    display: none;
-}
-
-details.card summary::after {
-    content: '›';
-    float: right;
-    color: var(--text-muted);
-    transition: transform 0.2s;
-}
-
-details[open].card summary::after {
-    transform: rotate(90deg);
-}
-
-details[open].card summary {
-    margin-bottom: 14px;
 }
 
 /* Info Text */

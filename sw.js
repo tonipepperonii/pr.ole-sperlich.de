@@ -1,5 +1,5 @@
 // Service Worker für PR Tracker PWA
-const CACHE_NAME = 'pr-tracker-v2';
+const CACHE_NAME = 'pr-tracker-v3';
 
 // App-Dateien (network first → Updates kommen sofort an, offline aus dem Cache)
 const STATIC_FILES = [
@@ -22,7 +22,8 @@ const EXTERNAL_RESOURCES = [
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => cache.addAll([...STATIC_FILES, ...EXTERNAL_RESOURCES]))
+      // reload: Browser-Cache umgehen, damit keine veralteten Dateien vorgehalten werden
+      .then(cache => cache.addAll([...STATIC_FILES, ...EXTERNAL_RESOURCES].map(url => new Request(url, { cache: 'reload' }))))
       .then(() => self.skipWaiting())
   );
 });
@@ -68,7 +69,9 @@ async function cacheFirst(request) {
 
 async function networkFirst(request) {
   try {
-    const networkResponse = await fetch(request);
+    // no-cache: immer beim Server nachfragen, damit HTML/JS/CSS nie aus
+    // unterschiedlichen Versionen stammen (GitHub Pages cacht 10 Minuten)
+    const networkResponse = await fetch(request.mode === 'navigate' ? request.url : request, { cache: 'no-cache' });
     if (networkResponse.ok) {
       const cache = await caches.open(CACHE_NAME);
       cache.put(request, networkResponse.clone());
